@@ -1,0 +1,12 @@
+Scripts
+build
+dist
+Lib
+__pycache__
+icon.ico
+Pensiones.spec
+pyvenv.cfg
+Compilar.bat
+.gitignore
+Include
+Fuente
