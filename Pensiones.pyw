@@ -4,7 +4,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import calendar
 import os
-from num2words import num2words
+from num2words import num2words  
+import csv
 
 from db import *  #Ahí se encuentran los datos de salarios minimos y UMAS
  
@@ -23,12 +24,12 @@ def cerrar_ventana():
 
 def Recargar():
     tipo = 0
-    global iteraciones, combo_tipo
+    global iteraciones, C_tipo
     if iteraciones == 0:
-        tipo = combo_tipo.get()
-        label_tipo.destroy()
-        combo_tipo.destroy()
-        boton_Recargar.destroy()
+        tipo = C_tipo.get()
+        L_tipo.destroy()
+        C_tipo.destroy()
+        B_Recargar.destroy()
         iteraciones +=1
 
     TipoDeuda(tipo)
@@ -41,49 +42,44 @@ def Repetir():
     main()
 
 def base():
-    global entry_nombre_archivo, entry_yeari,combo_mes_inicio,entry_yearf,combo_mes_final,combo_tipo,boton_repetir
+    global E_nombre_archivo, E_yeari,C_mes_inicio,E_yearf,C_mes_final,C_tipo,B_repetir
     root.geometry("300x300")
-    label_nombre_archivo = tk.Label(root, text="Nombre del archivo:",bg="#dedede")
-    label_nombre_archivo.grid(row=0, column=0, padx=5, pady=5)
-    entry_nombre_archivo = tk.Entry(root)
-    entry_nombre_archivo.grid(row=0, column=1, padx=5, pady=5)
+    L_nombre_archivo = tk.Label(root, text="Nombre del archivo:",bg="#dedede")
+    L_nombre_archivo.grid(row=0, column=0, padx=5, pady=5)
+    E_nombre_archivo = tk.Entry(root)
+    E_nombre_archivo.grid(row=0, column=1, padx=5, pady=5)
 
-    label_yeari = tk.Label(root, text="Año de inicio:",bg="#dedede")
-    label_yeari.grid(row=1, column=0, padx=5, pady=5)
-    entry_yeari = tk.Entry(root,validate="key",validatecommand=(root.register(validate_float), "%P", "%S"))
-    entry_yeari.grid(row=1, column=1, padx=5, pady=5)
+    L_yeari = tk.Label(root, text="Año de inicio:",bg="#dedede")
+    L_yeari.grid(row=1, column=0, padx=5, pady=5)
+    E_yeari = tk.Entry(root,validate="key",validatecommand=(root.register(validar_float), "%P", "%S"))
+    E_yeari.grid(row=1, column=1, padx=5, pady=5)
 
-    label_mes_inicio = tk.Label(root, text="Mes de inicio:",bg="#dedede")
-    label_mes_inicio.grid(row=2, column=0, padx=5, pady=5)
-    combo_mes_inicio = ttk.Combobox(root, values=list(range(1, 13)),state='readonly')
-    combo_mes_inicio.grid(row=2, column=1, padx=5, pady=5)
+    L_mes_inicio = tk.Label(root, text="Mes de inicio:",bg="#dedede")
+    L_mes_inicio.grid(row=2, column=0, padx=5, pady=5)
+    C_mes_inicio = ttk.Combobox(root, values=list(range(1, 13)),state='readonly')
+    C_mes_inicio.grid(row=2, column=1, padx=5, pady=5)
 
-    label_yearf = tk.Label(root, text="Año final:",bg="#dedede")
-    label_yearf.grid(row=3, column=0, padx=5, pady=5)
-    entry_yearf = tk.Entry(root,validate="key",validatecommand=(root.register(validate_float), "%P", "%S"))
-    entry_yearf.grid(row=3, column=1, padx=5, pady=5)
+    L_yearf = tk.Label(root, text="Año final:",bg="#dedede")
+    L_yearf.grid(row=3, column=0, padx=5, pady=5)
+    E_yearf = tk.Entry(root,validate="key",validatecommand=(root.register(validar_float), "%P", "%S"))
+    E_yearf.grid(row=3, column=1, padx=5, pady=5)
 
-    label_mes_final = tk.Label(root, text="Mes final:",bg="#dedede")
-    label_mes_final.grid(row=4, column=0, padx=5, pady=5)
-    combo_mes_final = ttk.Combobox(root, values=list(range(1, 13)),state='readonly')
-    combo_mes_final.grid(row=4, column=1, padx=5, pady=5)
+    L_mes_final = tk.Label(root, text="Mes final:",bg="#dedede")
+    L_mes_final.grid(row=4, column=0, padx=5, pady=5)
+    C_mes_final = ttk.Combobox(root, values=list(range(1, 13)),state='readonly')
+    C_mes_final.grid(row=4, column=1, padx=5, pady=5)
 
-    boton_repetir = tk.Button(root, text="Repetir", command= Repetir)
-    boton_repetir.grid(row=8,column=1, columnspan=1, padx=5, pady=5)
-    # Ejecutar la ventana
+    B_repetir = tk.Button(root, text="Repetir", command= Repetir)
+    B_repetir.grid(row=8,column=1, columnspan=1, padx=5, pady=5)
 
 def numero_a_moneda(numero):
-    # Separar la parte entera y los decimales
     entero = int(numero)
     decimales = round((numero - entero) * 100)
 
-    # Convertir la parte entera a texto
     texto_entero = num2words(entero, lang='es').capitalize()
 
-    # Convertir los decimales a texto
     texto_decimales = num2words(decimales, lang='es').capitalize()
 
-    # Crear la representación en texto
     if decimales > 0:
         resultado = f"{texto_entero} pesos y {texto_decimales} centavos"
     else:
@@ -91,24 +87,23 @@ def numero_a_moneda(numero):
 
     return resultado
 
-def strtf(string_value):
+def strtf(string_value):                    #String a float
     try:
         float_value = float(string_value)
         return float_value
     except ValueError:
-        print("Error: The string contains a non-numeric value.")
+        print("Error: El string no contiene un valor numérico")
         return None
     
-def strti(string_value):
+def strti(string_value):                    #String a int
     try:
         float_value = int(string_value)
         return float_value
     except ValueError:
-        print("Error: The string contains a non-numeric value.")
+        print("Error: El string no contiene un valor numérico")
         return None
 
-def validate_float(input_string, event):
-    """Validate input as a floating-point number."""
+def validar_float(input_string, event):     #Por si a caso
     if input_string.isdigit() or input_string == "." or (input_string[0] == "." and len(input_string) == 1):
         try:
             float(input_string)
@@ -117,7 +112,13 @@ def validate_float(input_string, event):
             return False
     else:
         return False
-    
+
+def convertir_a_float(lista):               #Convierte toda una lista a float
+    try:
+        return [float(elemento) for elemento in lista]
+    except ValueError:
+        return "Error: No todos los elementos de la lista pueden convertirse a float."
+
 def cant_dias(year, month):                
     return calendar.monthrange(year, month)[1]
 
@@ -138,61 +139,120 @@ def NombreMes(numero_mes):
     }
     return meses.get(numero_mes, "Mes inválido")
 
+def NumeroMes(nombre_mes):
+    meses = {
+        "Enero": 1,
+        "Febrero": 2, 
+        "Marzo": 3, 
+        "Abril": 4,
+        "Mayo": 5, 
+        "Junio": 6, 
+        "Julio": 7, 
+        "Agosto": 8,
+        "Septiembre": 9, 
+        "Octubre": 10, 
+        "Noviembre": 11, 
+        "Diciembre": 12
+    }
+    return meses.get(nombre_mes.capitalize(), None)  
+
 def smm(smda, year, month):
     return round((smda * cant_dias(year, month)), 3)
 
+def Template(YearI, YearF, MesI, MesF):
+    filename = 'Rango.csv'
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        
+        for Year in range(YearI, YearF + 1):
+            writer.writerow([f'{Year}']) 
+
+            start_month = MesI if Year == YearI else 1
+            end_month = MesF if Year == YearF else 12
+
+            for Mes in range(start_month, end_month + 1):
+                writer.writerow([f'{NombreMes(Mes)}', '']) 
+            
+    print(f"Archivo '{filename}' generado exitosamente.")
+
+def obtener_valor(año, mes, archivo='Rango.csv'):
+    with open(archivo, 'r', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        año_actual = None
+
+        for row in reader:
+            row = [campo.strip() for campo in row if campo.strip()] 
+            if len(row) == 1:  
+                try:
+                    año_actual = int(row[0])
+                except ValueError:
+                    continue 
+            elif len(row) == 2 and año_actual is not None: 
+                nombre_mes, valor = row[0].strip(), row[1].strip()
+                num_mes = NumeroMes(nombre_mes)
+
+                if año_actual == año and num_mes == mes:
+                    return int(valor)
+
 def TipoDeuda(tipo):
-    global entry_Porc, entry_Cant, entry_Cliq, combo_sm, combo_UMAS
+    global E_Porc, E_Cant, E_Cliq, C_sm, C_UMAS, L_GenTemplate, B_GenTemplate  
     if tipo == "Salario Minimo":
         base()
-        label_sm = tk.Label(root, text="Salario mínimo?",bg="#dedede")
-        label_sm.grid(row=6, column=0, padx=5, pady=5)
-        combo_sm = ttk.Combobox(root, values=["Completo", "Medio", "3/4", "Uno y medio","Doble"],state="readonly")
-        combo_sm.grid(row=6, column=1, padx=5, pady=5)
-        boton_SM = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoSM(dec))
-        boton_SM.grid(row=8, columnspan=1, padx=5, pady=5)
+        L_sm = tk.Label(root, text="Salario mínimo?",bg="#dedede")
+        L_sm.grid(row=6, column=0, padx=5, pady=5)
+        C_sm = ttk.Combobox(root, values=["Completo", "Medio", "3/4", "Uno y medio","Doble"],state="readonly")
+        C_sm.grid(row=6, column=1, padx=5, pady=5)
+        B_SM = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoSM(dec))
+        B_SM.grid(row=8, columnspan=1, padx=5, pady=5)
     elif tipo == "UMAS":
         base()
-        label_UMAS = tk.Label(root, text="Ingresa la UMA",bg="#dedede")
-        label_UMAS.grid(row=6, column=0, padx=5, pady=5)
-        combo_UMAS = ttk.Combobox(root, values=["Completa", "Media", "3/4", "Una y media","Doble"],state='readonly')
-        combo_UMAS.grid(row=6, column=1, padx=5, pady=5)
-        boton_UMAS = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoUMAS(dec))
-        boton_UMAS.grid(row=8, columnspan=1, padx=5, pady=5)
+        L_UMAS = tk.Label(root, text="Ingresa la UMA",bg="#dedede")
+        L_UMAS.grid(row=6, column=0, padx=5, pady=5)
+        C_UMAS = ttk.Combobox(root, values=["Completa", "Media", "3/4", "Una y media","Doble"],state='readonly')
+        C_UMAS.grid(row=6, column=1, padx=5, pady=5)
+        B_UMAS = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoUMAS(dec))
+        B_UMAS.grid(row=8, columnspan=1, padx=5, pady=5)
     elif tipo == "C.Liquida":
         base()
-        label_Cliq = tk.Label(root, text="Ingresa la cantidad",bg="#dedede")
-        label_Cliq.grid(row=6, column=0, padx=5, pady=5)
-        entry_Cliq = tk.Entry(root,validate="key",validatecommand=(root.register(validate_float), "%P", "%S"))
-        entry_Cliq.grid(row=6, column=1, padx=5, pady=5)
-        cant = entry_Cliq.get()
-        boton_Cliq = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoCliq(cant))
-        boton_Cliq.grid(row=8, columnspan=1, padx=5, pady=5)
+        L_Cliq = tk.Label(root, text="Ingresa la cantidad",bg="#dedede")
+        L_Cliq.grid(row=6, column=0, padx=5, pady=5)
+        E_Cliq = tk.Entry(root,validate="key",validatecommand=(root.register(validar_float), "%P", "%S"))
+        E_Cliq.grid(row=6, column=1, padx=5, pady=5)
+        cant = E_Cliq.get()
+        B_Cliq = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoCliq(cant))
+        B_Cliq.grid(row=8, columnspan=1, padx=5, pady=5)
     elif tipo == "Porcentaje":
         root.geometry("550x400")
         base()
-        label_Cant = tk.Label(root, text="Ingresa la cantidad", bg="#dedede")
-        label_Cant.grid(row=6, column=0, padx=5, pady=5)
-        entry_Cant = tk.Entry(root, validate="key", validatecommand=(root.register(validate_float), "%P", "%S"))
-        entry_Cant.grid(row=6, column=1, padx=5, pady=5)
+        L_Cant = tk.Label(root, text="Ingresa la cantidad", bg="#dedede")
+        L_Cant.grid(row=6, column=0, padx=5, pady=5)
+        E_Cant = tk.Entry(root, validate="key", validatecommand=(root.register(validar_float), "%P", "%S"))
+        E_Cant.grid(row=6, column=1, padx=5, pady=5)
         
-        label_Porc = tk.Label(root, text="Ingresa el porcentaje", bg="#dedede")
-        label_Porc.grid(row=7, column=0, padx=5, pady=5)
-        entry_Porc = tk.Entry(root, validate="key", validatecommand=(root.register(validate_float), "%P", "%S"))
-        entry_Porc.grid(row=7, column=1, padx=5, pady=5)
-        boton_porc = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoPorc(entry_Cant.get(),entry_Porc.get()))
-        boton_porc.grid(row=8, columnspan=1, padx=5, pady=5)
+        L_Porc = tk.Label(root, text="Ingresa el porcentaje", bg="#dedede")
+        L_Porc.grid(row=7, column=0, padx=5, pady=5)
+        E_Porc = tk.Entry(root, validate="key", validatecommand=(root.register(validar_float), "%P", "%S"))
+        E_Porc.grid(row=7, column=1, padx=5, pady=5)
+        B_porc = tk.Button(root, text="Generar Archivo", command=lambda: generar_archivoPorc(E_Cant.get(),E_Porc.get()))
+        B_porc.grid(row=8, columnspan=1, padx=5, pady=5)
+    elif tipo == "Rango":
+        base()
+        L_GenTemplate = tk.Label(root, text="Generar Plantilla", bg="#dedede")
+        L_GenTemplate.grid(row=5, column=0, padx=5, pady=5)
+        B_GenTemplate = tk.Button(root, text="Generar", command=GenerarPlantilla)
+        B_GenTemplate.grid(row=5,column=1, columnspan=2, padx=5, pady=5) 
 
-def generar_archivoSM(dec):
-    global entry_yeari, entry_yearf, combo_mes_final, combo_mes_inicio, entry_nombre_archivo,combo_sm
-    Archivo = entry_nombre_archivo.get()
-    doc = Archivo
-    doc = f"{doc}.txt"
-    dec = ""
+        L_GenArchivo = tk.Label(root, text="Cargar Plantilla", bg="#dedede")
+        L_GenArchivo.grid(row=6, column=0, padx=5, pady=5)
+        B_GenArchivo = tk.Button(root, text="Cargar", command=lambda: generar_archivoCustom())
+        B_GenArchivo.grid(row=6, column=1, columnspan=2, padx=5, pady=5) 
+
+def GenerarPlantilla():
+    global E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo, L_GenTemplate, B_GenTemplate 
+    
     try:
-        dec = combo_sm.get()
-        Yeari = int(entry_yeari.get())
-        Yearf = int(entry_yearf.get())
+        Y0=int(E_yeari.get())
+        Y1=int(E_yearf.get())
         if Yearf < Yeari:
             messagebox.showwarning("Error","El año final es menor que el año de inicio")
             return
@@ -204,8 +264,36 @@ def generar_archivoSM(dec):
             pass
         else: 
             messagebox.showwarning("Error","Verifica escribir bien tus datos")
-    Monthi = combo_mes_inicio.current()+1
-    Monthf = combo_mes_final.current()+1
+    M0=int(C_mes_inicio.current())+1
+    M1=int(C_mes_final.current())+1
+
+
+    Template(Y0,Y1,M0,M1)
+    os.system("Rango.csv")
+
+def generar_archivoSM(dec):
+    global E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo,C_sm
+    Archivo = E_nombre_archivo.get()
+    doc = Archivo
+    doc = f"{doc}.txt"
+    dec = ""
+    try:
+        dec = C_sm.get()
+        Yeari = int(E_yeari.get())
+        Yearf = int(E_yearf.get())
+        if Yearf < Yeari:
+            messagebox.showwarning("Error","El año final es menor que el año de inicio")
+            return
+        if Yeari > 2025 or Yearf > 2025:
+            messagebox.showwarning("Error","Ingresa un año igual o menor al actual")
+            return
+    except ValueError as er:
+        if str(er) == "invalid literal for int() with base 10: ''":
+            pass
+        else: 
+            messagebox.showwarning("Error","Verifica escribir bien tus datos")
+    Monthi = C_mes_inicio.current()+1
+    Monthf = C_mes_final.current()+1
     
     with open(doc, "w") as archivo:
         SumTotal = 0
@@ -248,15 +336,15 @@ def generar_archivoSM(dec):
     os.system(doc)
 
 def generar_archivoUMAS(dec):
-    global entry_yeari, entry_yearf, combo_mes_final, combo_mes_inicio, entry_nombre_archivo,combo_UMAS
-    Archivo = entry_nombre_archivo.get()
+    global E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo,C_UMAS
+    Archivo = E_nombre_archivo.get()
     doc = Archivo
     doc = f"{doc}.txt"
     dec = ""
     try:
-        dec = combo_UMAS.get()
-        Yeari = int(entry_yeari.get())
-        Yearf = int(entry_yearf.get())
+        dec = C_UMAS.get()
+        Yeari = int(E_yeari.get())
+        Yearf = int(E_yearf.get())
         if Yearf < Yeari:
             messagebox.showwarning("Error","El año final es menor que el año de inicio")
             return
@@ -268,8 +356,8 @@ def generar_archivoUMAS(dec):
             pass
         else: 
             messagebox.showwarning("Error","Verifica escribir bien tus datos")
-    Monthi = combo_mes_inicio.current()+1
-    Monthf = combo_mes_final.current()+1
+    Monthi = C_mes_inicio.current()+1
+    Monthf = C_mes_final.current()+1
     
     with open(doc, "w") as archivo:
         SumTotal = 0
@@ -312,14 +400,14 @@ def generar_archivoUMAS(dec):
     os.system(doc)
 
 def generar_archivoCliq(cant):
-    global entry_yeari, entry_yearf, combo_mes_final, combo_mes_inicio, entry_nombre_archivo, entry_Cliq
-    Archivo = entry_nombre_archivo.get()
+    global E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo, E_Cliq
+    Archivo = E_nombre_archivo.get()
     doc = Archivo
     doc = f"{doc}.txt"
     try:
-        Yeari = int(entry_yeari.get())
-        Yearf = int(entry_yearf.get())
-        cantidad = strtf(entry_Cliq.get())
+        Yeari = int(E_yeari.get())
+        Yearf = int(E_yearf.get())
+        cantidad = strtf(E_Cliq.get())
         if Yearf < Yeari:
             messagebox.showwarning("Error","El año final es menor que el año de inicio")
             return
@@ -334,8 +422,8 @@ def generar_archivoCliq(cant):
             pass
         else: 
             messagebox.showwarning("Error","Verifica escribir bien tus datos")
-    Monthi = combo_mes_inicio.current()+1
-    Monthf = combo_mes_final.current()+1
+    Monthi = C_mes_inicio.current()+1
+    Monthf = C_mes_final.current()+1
     
     with open(doc, "w") as archivo:
         SumTotal = 0
@@ -367,13 +455,13 @@ def generar_archivoCliq(cant):
     os.system(doc)
 
 def generar_archivoPorc(cant, porc):
-    global entry_Porc, entry_Cant, entry_yeari, entry_yearf, combo_mes_final, combo_mes_inicio, entry_nombre_archivo
-    Archivo = entry_nombre_archivo.get()
+    global E_Porc, E_Cant, E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo
+    Archivo = E_nombre_archivo.get()
     doc = Archivo
     doc = f"{doc}.txt"
     try:
-        Yeari = strti(entry_yeari.get())
-        Yearf = strti(entry_yearf.get())
+        Yeari = strti(E_yeari.get())
+        Yearf = strti(E_yearf.get())
         cantidad = (int(cant))*((int(porc))/100)
         if Yearf < Yeari:
             messagebox.showwarning("Error","El año final es menor que el año de inicio")
@@ -389,8 +477,8 @@ def generar_archivoPorc(cant, porc):
             pass
         else: 
             messagebox.showwarning("Error","Verifica escribir bien tus datos")
-    Monthi = combo_mes_inicio.current()+1
-    Monthf = combo_mes_final.current()+1
+    Monthi = C_mes_inicio.current()+1
+    Monthf = C_mes_final.current()+1
     
     with open(doc, "w") as archivo:
         SumTotal = 0
@@ -421,9 +509,60 @@ def generar_archivoPorc(cant, porc):
     messagebox.showinfo("Archivo Creado", "El archivo se generó exitosamente")
     os.system(doc)
 
+def generar_archivoCustom():
+    global E_yeari, E_yearf, C_mes_final, C_mes_inicio, E_nombre_archivo
+    Archivo = E_nombre_archivo.get()
+    doc = Archivo
+    doc = f"{doc}.txt"
+    
+    try:
+        Yeari = int(E_yeari.get())
+        Yearf = int(E_yearf.get())
+        if Yearf < Yeari:
+            messagebox.showwarning("Error","El año final es menor que el año de inicio")
+            return
+        if Yeari > 2025 or Yearf > 2025:
+            messagebox.showwarning("Error","Ingresa un año igual o menor al actual")
+            return
+    except ValueError as er:
+        if str(er) == "invalid literal for int() with base 10: ''":
+            pass
+        else: 
+            messagebox.showwarning("Error","Verifica escribir bien tus datos")
+    Monthi = C_mes_inicio.current()+1
+    Monthf = C_mes_final.current()+1
+
+
+    with open(doc, "w") as archivo:
+        SumTotal = 0
+        for year in range(Yeari, Yearf+1):                      #Primer for (años)
+            if year == Yeari:
+                MesI = Monthi
+            else:
+                MesI = 1
+            if year == Yearf:
+                MesF = Monthf
+            else:
+                MesF = 12
+
+            archivo.write(f"\t\t--Año: {year} --\n")
+            
+            SumMensual = []
+            for mes in range(MesI, MesF+1):                     #Segundo for (meses)
+                salario_mes = obtener_valor(year, mes)
+                SumMensual.append(salario_mes)
+                archivo.write(f"{NombreMes(mes)} - {year}\t: ${salario_mes} ({numero_a_moneda(salario_mes)} m.n)\n")
+
+            SumAnual = sum(convertir_a_float(SumMensual))
+            SumTotal += SumAnual
+            archivo.write(f"\nSuma pagos mensuales en el año {year}: ${round(SumAnual,3)} ({numero_a_moneda(SumAnual)} m.n)\n")
+            archivo.write(f"Suma total acumulada hasta el año {year}: ${round(SumTotal,3)} ({numero_a_moneda(SumTotal)} m.n)\n\n")
+
+    os.system(doc)
+
 def main():
 
-    global combo_tipo, root, label_tipo, boton_Recargar
+    global C_tipo, root, L_tipo, B_Recargar
 
     root = tk.Tk()
     root.title("Calculadora de pensiones")
@@ -431,13 +570,13 @@ def main():
     root.resizable(0,0)
 
     root.geometry("230x100")
-    label_tipo = tk.Label(root, text="Tipo",bg="#dedede")
-    label_tipo.grid(row=5, column=0, padx=5, pady=5)
-    combo_tipo = ttk.Combobox(root, values=["Salario Minimo", "UMAS", "C.Liquida","Porcentaje"],state="readonly")
-    combo_tipo.grid(row=5, column=1, padx=5, pady=5)
+    L_tipo = tk.Label(root, text="Tipo",bg="#dedede")
+    L_tipo.grid(row=5, column=0, padx=5, pady=5)
+    C_tipo = ttk.Combobox(root, values=["Salario Minimo", "UMAS", "C.Liquida","Porcentaje","Rango"],state="readonly")
+    C_tipo.grid(row=5, column=1, padx=5, pady=5)
 
-    boton_Recargar = tk.Button(root, text="Continuar", command= Recargar)
-    boton_Recargar.grid(row=7,column=1, columnspan=2, padx=5, pady=5)
+    B_Recargar = tk.Button(root, text="Continuar", command= Recargar)
+    B_Recargar.grid(row=7,column=1, columnspan=2, padx=5, pady=5)
 
     root.mainloop()
 
