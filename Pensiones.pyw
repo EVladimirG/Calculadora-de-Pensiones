@@ -5,6 +5,7 @@ from tkinter import ttk, messagebox
 import calendar
 import os
 from num2words import num2words
+import csv
 
 from db import *  #Ahí se encuentran los datos de salarios minimos y UMAS
  
